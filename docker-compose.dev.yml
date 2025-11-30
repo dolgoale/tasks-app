@@ -1,0 +1,88 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: tasks-backend-dev
+    restart: unless-stopped
+    
+    # Проброс портов
+    ports:
+      - "8001:8000"
+    
+    # Переменные окружения
+    environment:
+      - PYTHONUNBUFFERED=1
+      - ENVIRONMENT=development
+      - DATABASE_PATH=/app/data/tasks.db
+    
+    # Монтирование томов для разработки (hot-reload)
+    volumes:
+      - ./backend/src:/app/src
+      - ./backend/requirements.txt:/app/requirements.txt
+      - ./logs:/app/logs
+      - ./backend/data:/app/data  # Директория для базы данных
+    
+    # Логирование
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    
+    # Здоровье контейнера
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    # Сетевая конфигурация
+    networks:
+      - tasks-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: tasks-frontend-dev
+    restart: unless-stopped
+    
+    # Проброс портов
+    ports:
+      - "3001:3000"
+    
+    # Переменные окружения
+    environment:
+      - REACT_APP_API_URL=http://localhost:8001/api
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+    
+    # Монтирование томов для разработки (hot-reload)
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+      - ./frontend/package.json:/app/package.json
+      - ./frontend/tsconfig.json:/app/tsconfig.json
+      - /app/node_modules
+    
+    # Зависимости
+    depends_on:
+      - backend
+    
+    # Логирование
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    
+    # Сетевая конфигурация
+    networks:
+      - tasks-network
+
+networks:
+  tasks-network:
+    driver: bridge
+

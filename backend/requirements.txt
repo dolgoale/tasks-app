@@ -1,0 +1,24 @@
+# Web Framework
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+
+# CORS support
+python-multipart>=0.0.6
+
+# Database (SQLite для простоты, можно заменить на PostgreSQL)
+sqlalchemy>=2.0.0
+alembic>=1.12.0
+
+# Environment variables
+python-dotenv>=1.0.0
+
+# Data validation
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
+
+# Async HTTP client
+httpx>=0.25.0
+
+# Date/time utilities
+python-dateutil>=2.8.2
+
