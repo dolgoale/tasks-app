@@ -291,6 +291,13 @@ const TaskTable: React.FC<TaskTableProps> = ({ filter, category, priority }) => 
     };
   }, [loadCategories]);
 
+  // Загружаем категории при открытии диалога
+  useEffect(() => {
+    if (openDialog) {
+      loadCategories();
+    }
+  }, [openDialog, loadCategories]);
+
   const loadTasks = useCallback(async () => {
     try {
       setLoading(true);
@@ -483,7 +490,6 @@ const TaskTable: React.FC<TaskTableProps> = ({ filter, category, priority }) => 
         maxWidth="sm"
         fullWidth
         fullScreen={isMobile}
-        onEnter={() => loadCategories()}
       >
         <DialogTitle>Создать новую задачу</DialogTitle>
         <DialogContent>
