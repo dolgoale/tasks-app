@@ -1,0 +1,76 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    container_name: tasks-backend
+    restart: unless-stopped
+    
+    # Проброс портов
+    ports:
+      - "8001:8000"
+    
+    # Переменные окружения
+    environment:
+      - PYTHONUNBUFFERED=1
+      - ENVIRONMENT=production
+      - DATABASE_PATH=/app/data/tasks.db
+    
+    # Монтирование томов
+    volumes:
+      - ./backend/data:/app/data
+      - ./logs:/app/logs
+    
+    # Логирование
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    
+    # Здоровье контейнера
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    # Сетевая конфигурация
+    networks:
+      - tasks-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+    container_name: tasks-frontend
+    restart: unless-stopped
+    
+    # Проброс портов
+    ports:
+      - "80:80"
+    
+    # Переменные окружения
+    environment:
+      - REACT_APP_API_URL=http://194.87.46.14:8001/api
+    
+    # Зависимости
+    depends_on:
+      - backend
+    
+    # Логирование
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    
+    # Сетевая конфигурация
+    networks:
+      - tasks-network
+
+networks:
+  tasks-network:
+    driver: bridge
+
