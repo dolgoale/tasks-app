@@ -2,6 +2,7 @@
 
 Веб-приложение для управления задачами с разделением на frontend и backend.
 
+**Репозиторий:** https://github.com/dolgoale/tasks-app  
 **Домен:** tasks.aadolgov.com (в разработке)
 
 ## Структура проекта
