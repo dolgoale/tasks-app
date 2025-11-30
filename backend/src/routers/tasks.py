@@ -255,17 +255,14 @@ async def update_task(task_id: int, task_update: TaskUpdate, db: Session = Depen
     
     # Проверяем изменение статуса для родительской задачи
     if task_update.status is not None and task_update.status != db_task.status:
-        # Проверяем, есть ли подзадачи
-        subtasks = db.query(Task).filter(Task.parent_id == task_id).all()
-        if subtasks:
-            # Получаем все статусы подзадач (рекурсивно)
-            subtask_statuses = get_all_subtasks_statuses(task_id, db)
-            # Проверяем, есть ли подзадачи с другим статусом
-            if subtask_statuses and not all(status == task_update.status for status in subtask_statuses):
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Невозможно изменить статус родительской задачи. У неё есть подзадачи с другими статусами. Сначала измените статусы всех подзадач."
-                )
+        # Получаем все статусы подзадач (рекурсивно)
+        subtask_statuses = get_all_subtasks_statuses(task_id, db)
+        # Проверяем, есть ли подзадачи с другим статусом
+        if len(subtask_statuses) > 0 and not all(status == task_update.status for status in subtask_statuses):
+            raise HTTPException(
+                status_code=400,
+                detail=f"Невозможно изменить статус родительской задачи. У неё есть подзадачи с другими статусами. Сначала измените статусы всех подзадач."
+            )
     
     # Обновляем поля
     update_data = task_update.model_dump(exclude_unset=True)
@@ -298,17 +295,14 @@ async def toggle_task_completion(task_id: int, db: Session = Depends(get_db)):
     
     # Проверяем изменение статуса для родительской задачи
     if new_status != db_task.status:
-        # Проверяем, есть ли подзадачи
-        subtasks = db.query(Task).filter(Task.parent_id == task_id).all()
-        if subtasks:
-            # Получаем все статусы подзадач (рекурсивно)
-            subtask_statuses = get_all_subtasks_statuses(task_id, db)
-            # Проверяем, есть ли подзадачи с другим статусом
-            if subtask_statuses and not all(status == new_status for status in subtask_statuses):
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Невозможно изменить статус родительской задачи. У неё есть подзадачи с другими статусами. Сначала измените статусы всех подзадач."
-                )
+        # Получаем все статусы подзадач (рекурсивно)
+        subtask_statuses = get_all_subtasks_statuses(task_id, db)
+        # Проверяем, есть ли подзадачи с другим статусом
+        if len(subtask_statuses) > 0 and not all(status == new_status for status in subtask_statuses):
+            raise HTTPException(
+                status_code=400,
+                detail=f"Невозможно изменить статус родительской задачи. У неё есть подзадачи с другими статусами. Сначала измените статусы всех подзадач."
+            )
     
     db_task.is_completed = not db_task.is_completed
     if db_task.is_completed:
