@@ -39,7 +39,7 @@ export const api = {
   },
 
   createTask: async (task: CreateTaskDto): Promise<Task> => {
-    const response = await apiClient.post<Task>('/tasks', task);
+    const response = await apiClient.post<Task>('/tasks/', task);
     return response.data;
   },
 
