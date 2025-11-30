@@ -316,7 +316,12 @@ const TaskTable: React.FC<TaskTableProps> = ({ filter, category, priority }) => 
 
   const handleCreateTask = async () => {
     try {
-      await api.createTask(newTask);
+      // Убираем пустую категорию
+      const taskToCreate = {
+        ...newTask,
+        category: newTask.category?.trim() || undefined,
+      };
+      await api.createTask(taskToCreate);
       setOpenDialog(false);
       setNewTask({
         title: '',
@@ -329,8 +334,13 @@ const TaskTable: React.FC<TaskTableProps> = ({ filter, category, priority }) => 
       // Обновляем список категорий
       loadCategories();
       window.dispatchEvent(new Event('refreshCategories'));
-    } catch (error) {
+    } catch (error: any) {
       console.error('Ошибка при создании задачи:', error);
+      if (error.response?.data?.detail) {
+        alert(`Ошибка: ${JSON.stringify(error.response.data.detail)}`);
+      } else {
+        alert('Ошибка при создании задачи. Проверьте консоль для деталей.');
+      }
     }
   };
 

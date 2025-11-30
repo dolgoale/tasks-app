@@ -23,7 +23,7 @@ export const api = {
     if (filter) params.filter_completed = filter;
     if (category) params.category = category;
     if (priority) params.priority = priority.toLowerCase();
-    const response = await apiClient.get<TaskListResponse>('/tasks', { params });
+    const response = await apiClient.get<TaskListResponse>('/tasks/', { params });
     return response.data;
   },
 
